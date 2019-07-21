@@ -1,39 +1,57 @@
 # -*- coding: utf-8 -*-
+import os
+import urllib
 
-from google.appengine.api import urlfetch
-from google.cloud import translate
-import json, urllib
-from flask import Flask, render_template, request
-from collections import deque
-from urllib import urlencode
+import jinja2
+import webapp2
 
-import requests
-from requests_toolbelt.adapters import appengine
+from models import Restaurant
 
-appengine.monkeypatch()
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=True)
 
-app = Flask(__name__)
-app.debug = True
+class MainPage(webapp2.RequestHandler):
 
-translate_client = translate.Client()
+	def __init__(self):
+		self.__restaurants = self.readRestaurants("restaurant.csv")
+		self.__recordLimit = 5
 
-@app.route('/')
+	""" exception
+        readfile 
+        thread: read two files in two threads"""
+	def readRestaurants(self, file_path):
+		try:
+			restaurants = []
+			lines = open(file_path)
+			lines.readline()
+			for line in lines:
+				items = line.strip().split(',')
+				name = items[1]
+				address = items[2]
+				score = items[3]
+				tags = (items[4].replace("??", "/")).strip().split('、')
+				stationDistance = items[5].split(" ")
+				station = stationDistance[0]
+				distance = int(stationDistance[1].rstrip("m"))
+				restaurant = Restaurant(name, address, score, tags, station, distance)
+				restaurants.append(restaurant)
+			lines.close()
+			return restaurants
+		except IOError:
+			print("Error: restaurant.csv does not exist or it can't be opened.")
 
-def root():
-	return render_template('hello.html')
 
-@app.route('/section3')
-def section3():
-	pata = request.args.get('a', '') + request.args.get('b', '')
-	return render_template('section3.html', pata=pata)
+	def get(self):
+		template_values = {
+			'restaurants': self.restaurants[0:self.__recordLimit]
+		}
 
-@app.route('/section1')
-def section1():
-	pata = request.args.get('a', '') + request.args.get('b', '')
-	return render_template('section1.html', pata=pata)
+		template = JINJA_ENVIRONMENT.get_template('index.html')
+		self.response.write(template.render(template_values))
 
 
-@app.route('/section2')
-def section2():
-	pata = request.args.get('a', '') + request.args.get('b', '')
-	return render_template('section2.html', pata=pata)
+app = webapp2.WSGIApplication([
+    ('/', MainPage)
+], debug=True)

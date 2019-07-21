@@ -43,14 +43,18 @@ body {
   <div class="hero-text">
     <h1 style="font-size:50px">hello!</h1>
     <ul>
-      <li><a href=/section1>section1</a></li>
-      <li><a href=/section2>section2</a></li>
-      <li><a href=/section3>section3</a></li>
+      <li><a href="">section1</a></li>
+      <li><a href="">section2</a></li>
+      <li><a href="">section3</a></li>
     </ul> 
     <form>
-    <input type=text name=word>
-    <input type=submit>
-  </form>
+        <input type=text name=word>
+        <input type=submit>
+    </form>
+    {%  for restaurant in restaurants %}
+    <ul>
+        <li>{% restaurant.name %}</li>
+    </ul>
   </div>
 </div>
 

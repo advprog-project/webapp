@@ -17,14 +17,27 @@ class Facility:
 class Restaurant(Facility):
 	def __init__(self, name, address, score, tags, station, distance):
 		Facility.__init__(self, name, address, score)
-		self.tags = tags
-		self.station = station
-		self.distance = distance
+		self.__tags = tags
+		self.__station = station
+		self.__distance = distance
+
 	def __str__(self):
 		return self.name + self.address + str(self.score) + self.station + str(self.distance)
-	def getTags(self):
-		for tag in self.tags:
-			print(tag, " ", end="")
+
+	def getStation(self):
+		return self.__station
+
+	def getDistance(self):
+		return self.__distance
+
+	def asdict(self):
+		return {
+			'name': self.__name,
+			'address': self.__address,
+			'score': self.__score,
+			'station': self.__station,
+			'distance': self.__distance
+		}
 				
 # class Hotel(Facility):
 # 	def __init__(self, name, address, score, star):

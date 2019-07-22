@@ -10,7 +10,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1" />
 <style>
 body {
   margin: 0;
@@ -54,6 +54,7 @@ body {
     {% for restaurant in restaurants %}
     <ul>
         <li>{{ restaurant.name }}</li>
+        <li><{{ restaurant.address }}</li>
     </ul>
     {% endfor %}
   </div>

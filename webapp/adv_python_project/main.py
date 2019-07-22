@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import urllib
+# from io import open
 
 import jinja2
 import webapp2
@@ -31,9 +31,10 @@ class MainPage(webapp2.RequestHandler):
 			for i in range(1, len(lines)):
 				line = lines[i]
 				items = line.strip().split(',')
-				name = items[1]
-				address = items[2]
-				score = items[3]
+				name = items[1].decode('utf-8')
+				address = items[2].decode('utf-8')
+				score = float(items[3])
+				# TODO utf-8
 				tags = (items[4].replace("??", "/")).strip().split('、')
 				stationDistance = items[5].split(" ")
 				station = stationDistance[0]
@@ -47,13 +48,18 @@ class MainPage(webapp2.RequestHandler):
 
 
 	def get(self):
-		print(self.__restaurants)
+		restaurants = list(map(lambda x: x.asdict(), self.__restaurants))
+
 		template_values = {
-			'restaurants': self.__restaurants[0:self.__recordLimit]
+			'restaurants': restaurants[0:self.__recordLimit]
 		}
 
 		template = JINJA_ENVIRONMENT.get_template('index.html')
+		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render(template_values))
+
+	def post(self):
+		pass
 
 
 app = webapp2.WSGIApplication([

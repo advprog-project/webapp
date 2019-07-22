@@ -1,4 +1,4 @@
-class Facility:
+class Facility(object):
 	def __init__(self, name, address, score):
 		self.__name = name 
 		self.__address = address
@@ -16,13 +16,13 @@ class Facility:
 
 class Restaurant(Facility):
 	def __init__(self, name, address, score, tags, station, distance):
-		Facility.__init__(self, name, address, score)
+		super(Restaurant, self).__init__(name, address, score)
 		self.__tags = tags
 		self.__station = station
 		self.__distance = distance
 
-	def __str__(self):
-		return self.__name + self.__address + str(self.__score) + self.__station + str(self.__distance)
+	# def __str__(self):
+	# 	return self.__name + self.__address + str(self.__score) + self.__station + str(self.__distance)
 
 	def getStation(self):
 		return self.__station
@@ -30,31 +30,40 @@ class Restaurant(Facility):
 	def getDistance(self):
 		return self.__distance
 
+	def getTags(self):
+		return self.__tags
+
 	def asdict(self):
 		return {
-			'name': self.__name,
-			'address': self.__address,
-			'score': self.__score,
-			'station': self.__station,
-			'distance': self.__distance
+			'name': self.getName(),
+			'address': self.getAddress(),
+			'score': self.getScore(),
+			'station': self.getStation(),
+			'distance': self.getDistance(),
+			'tags': self.getTags()
 		}
-				
+
 class Hotel(Facility):
-	def __init__(self, name, address, score, star):
-		Facility.__init__(self, name, address, score, NW_distance)
-		self.star = star
-		self.NW_distance = NW_distance
-	def __str__(self):
-		return self.__name + self.__address + str(self.__score) + str(self.__NW_distance)
+	def __init__(self, name, address, score, star, distance):
+		super(Hotel, self).__init__(self, name, address, score)
+		self.__star = star
+		self.__distance = distance
+
+  #def __str__(self):
+  #  return self.__name + self.__address + str(self.__score) + self.__star + str(self.__distance)
+
+	def getStar(self):
+		return self.__star
 
 	def getDistance(self):
-		return self.__NW_distance
+		return self.__distance
 
 	def asdict(self):
 		return {
 			'name': self.__name,
-			'address': self.__address,
-			'score': self.__score,
-			'star': self.__star
-			'distance': self.__NW_distance
-		}	
+	      		'address': self.__address,
+	      		'score': self.__score,
+	      		'star': self.__star,
+	      		'distance': self.__distance
+	    		}
+		

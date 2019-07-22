@@ -17,7 +17,6 @@ class MainPage(webapp2.RequestHandler):
 	def __init__(self, *args, **kwargs):
 		# Due to python2
 		super(MainPage, self).__init__(*args, **kwargs)
-		# super().__init__(, )
 		self.__restaurants = self.readRestaurants("data/restaurant.csv")
 		self.__recordLimit = 5
 
@@ -27,9 +26,10 @@ class MainPage(webapp2.RequestHandler):
 	def readRestaurants(self, file_path):
 		try:
 			restaurants = []
-			lines = open(file_path)
-			lines.readlines()
-			for line in lines:
+			fileHandler = open(file_path)
+			lines = fileHandler.readlines()
+			for i in range(1, len(lines)):
+				line = lines[i]
 				items = line.strip().split(',')
 				name = items[1]
 				address = items[2]
@@ -40,8 +40,7 @@ class MainPage(webapp2.RequestHandler):
 				distance = int(stationDistance[1].rstrip("m"))
 				restaurant = Restaurant(name, address, score, tags, station, distance)
 				restaurants.append(restaurant)
-			lines.close()
-			print(restaurants)
+			fileHandler.close()
 			return restaurants
 		except IOError:
 			print("Error: restaurant.csv does not exist or it can't be opened.")

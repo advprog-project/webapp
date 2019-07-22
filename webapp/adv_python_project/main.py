@@ -48,6 +48,7 @@ class RestaurantPage(webapp2.RequestHandler):
 			print("Error: restaurant.csv does not exist or it can't be opened.")
 
 	def get(self):
+		print(self.request.query_string)
 		restaurants = list(map(lambda x: x.asdict(), self.__restaurants))
 
 		template_values = {
@@ -60,6 +61,8 @@ class RestaurantPage(webapp2.RequestHandler):
 		self.response.write(template.render(template_values))
 
 	def post(self):
+		# tyuka = self.request.get('tyuka', 'restaurants')
+		# print(tyuka)
 		pass
 
 
@@ -103,7 +106,6 @@ class HotelPage(webapp2.RequestHandler):
 		template_values = {
 			'restaurants': hotels[0:self.__recordLimit]
 		}
-		print(hotels[0])
 
 		template = JINJA_ENVIRONMENT.get_template('hotels.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'

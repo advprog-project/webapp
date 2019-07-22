@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-# from io import open
+from urllib import unquote
 
 import jinja2
 import webapp2
@@ -20,6 +20,77 @@ class RestaurantPage(webapp2.RequestHandler):
 		super(RestaurantPage, self).__init__(*args, **kwargs)
 		self.__restaurants = self.readRestaurants("data/restaurant.csv")
 		self.__recordLimit = 5
+		self.__tag_map = {
+			'tyuuka': u'中華料理',
+			'izakaya': u'居酒屋',
+			'tukemen': u'つけ麺'
+		}
+
+	def queryParser(self, query):  # query:  =1&izakaya=1&keyword=黄金
+		tags = []
+		items = query.split('&')
+		keyword = items[-1].split('=')[-1]
+		keyword = unquote(keyword).decode('utf8')
+		distance = items[-2].split('=')[-1]
+
+		try:
+			distance = float(distance) if distance != "" else float('inf')
+		except ValueError:
+			# TODO handle exception
+			distance = float('inf')
+
+		# except NegativeDistanceError:
+
+		for i in range(len(items) - 2):
+			temp = items[i].split('=')
+			tags.append(temp[0])
+
+		return {
+			'keyword': keyword,
+			'distance': distance,
+			'tags': tags
+		}
+
+	def filterRestaurants(self, query):  # dictionary
+		print(query)
+		keyWordFilter = query['keyword']
+		distanceFilter = query['distance']
+		tagsFilter = query['tags']
+		tagsNumber = len(tagsFilter)
+		filteredRestaurants = []
+		# A list containing all the keywords (no longer a string due to the (possibly) space in user input)
+		wordsFilter = keyWordFilter.split()
+		for restaurant in self.__restaurants:
+			hasSmallerDistance = False
+			containsKeyword = False
+			containsTag = False
+			tagDet = 0
+			# check distance range
+			if restaurant.getDistance() <= distanceFilter:
+				hasSmallerDistance = True
+
+			# check keywords
+			if len(wordsFilter) == 0:
+				containsKeyword = True
+			else:
+				for word in wordsFilter:
+					if word in restaurant.getName():
+						containsKeyword = True
+						break
+
+			# check tags
+			for tagFilter in tagsFilter:  # tag of user input
+				for tag in restaurant.getTags():  # tag of restaurant
+					if self.__tag_map[tagFilter] == tag:
+						tagDet += 1
+			if (tagDet == tagsNumber) or tagsNumber == 0:  # contains all the user input tags
+				containsTag = True
+
+			# satisfy all the three requirements
+			if hasSmallerDistance and containsKeyword and containsTag:
+				filteredRestaurants.append(restaurant)
+
+		return filteredRestaurants
 
 	""" exception
         readfile 
@@ -48,13 +119,14 @@ class RestaurantPage(webapp2.RequestHandler):
 			print("Error: restaurant.csv does not exist or it can't be opened.")
 
 	def get(self):
-		print(self.request.query_string)
-		restaurants = list(map(lambda x: x.asdict(), self.__restaurants))
+		query = self.request.query_string if self.request.query_string != "" else "dist=&keyword="
+		query = self.queryParser(query)
+		restaurants = self.filterRestaurants(query)
+		restaurants = list(map(lambda x: x.asdict(), restaurants))
 
 		template_values = {
 			'restaurants': restaurants[0:self.__recordLimit]
 		}
-		print(restaurants[0])
 
 		template = JINJA_ENVIRONMENT.get_template('restaurants.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'

@@ -5,7 +5,7 @@ import urllib
 import jinja2
 import webapp2
 
-from models import Restaurant
+from models.facilities import Restaurant
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -14,8 +14,11 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 class MainPage(webapp2.RequestHandler):
 
-	def __init__(self):
-		self.__restaurants = self.readRestaurants("restaurant.csv")
+	def __init__(self, *args, **kwargs):
+		# Due to python2
+		super(MainPage, self).__init__(*args, **kwargs)
+		# super().__init__(, )
+		self.__restaurants = self.readRestaurants("data/restaurant.csv")
 		self.__recordLimit = 5
 
 	""" exception
@@ -25,7 +28,7 @@ class MainPage(webapp2.RequestHandler):
 		try:
 			restaurants = []
 			lines = open(file_path)
-			lines.readline()
+			lines.readlines()
 			for line in lines:
 				items = line.strip().split(',')
 				name = items[1]
@@ -38,14 +41,16 @@ class MainPage(webapp2.RequestHandler):
 				restaurant = Restaurant(name, address, score, tags, station, distance)
 				restaurants.append(restaurant)
 			lines.close()
+			print(restaurants)
 			return restaurants
 		except IOError:
 			print("Error: restaurant.csv does not exist or it can't be opened.")
 
 
 	def get(self):
+		print(self.__restaurants)
 		template_values = {
-			'restaurants': self.restaurants[0:self.__recordLimit]
+			'restaurants': self.__restaurants[0:self.__recordLimit]
 		}
 
 		template = JINJA_ENVIRONMENT.get_template('index.html')

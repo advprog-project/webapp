@@ -51,10 +51,11 @@ body {
         <input type=text name=word>
         <input type=submit>
     </form>
-    {%  for restaurant in restaurants %}
+    {% for restaurant in restaurants %}
     <ul>
-        <li>{% restaurant.name %}</li>
+        <li>{{ restaurant.name }}</li>
     </ul>
+    {% endfor %}
   </div>
 </div>
 

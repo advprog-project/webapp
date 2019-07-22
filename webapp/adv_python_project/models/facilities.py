@@ -22,7 +22,7 @@ class Restaurant(Facility):
 		self.__distance = distance
 
 	def __str__(self):
-		return self.name + self.address + str(self.score) + self.station + str(self.distance)
+		return self.__name + self.__address + str(self.__score) + self.__station + str(self.__distance)
 
 	def getStation(self):
 		return self.__station

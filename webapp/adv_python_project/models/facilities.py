@@ -39,7 +39,22 @@ class Restaurant(Facility):
 			'distance': self.__distance
 		}
 				
-# class Hotel(Facility):
-# 	def __init__(self, name, address, score, star):
-# 		Facility.__init__(self, name, address, score)
-# 		self.star = star
+class Hotel(Facility):
+	def __init__(self, name, address, score, star):
+		Facility.__init__(self, name, address, score, NW_distance)
+		self.star = star
+		self.NW_distance = NW_distance
+	def __str__(self):
+		return self.__name + self.__address + str(self.__score) + str(self.__NW_distance)
+
+	def getDistance(self):
+		return self.__NW_distance
+
+	def asdict(self):
+		return {
+			'name': self.__name,
+			'address': self.__address,
+			'score': self.__score,
+			'star': self.__star
+			'distance': self.__NW_distance
+		}	

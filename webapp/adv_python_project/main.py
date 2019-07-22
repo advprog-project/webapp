@@ -65,7 +65,7 @@ class RestaurantPage(webapp2.RequestHandler):
 			      distance = float(stationDistance[1].rstrip("km"))
 			      address = address1 + address2
 			      hotel = Hotel(name, address, score, star, distance)
-			      print(hotel.name, hotel.address, hotel.score, hotel.star, hotel.distance)
+			     #print(hotel.name, hotel.address, hotel.score, hotel.star, hotel.distance)
 			      hotels.append(hotel)
 		    fileHandler.close()
 		    return hotels

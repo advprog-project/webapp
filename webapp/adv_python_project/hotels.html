@@ -43,9 +43,27 @@ body {
   <div class="hero-text">
     <h1 style="font-size:50px">hello!</h1>
     <ul>
-      <li><a href="/restaurants">restaurants</a></li>
-      <li><a href="/hotels">hotels</a></li>
+      <li><a href="">section1</a></li>
+      <li><a href="">section2</a></li>
+      <li><a href="">section3</a></li>
+    </ul> 
+    <form>
+        <input type=text name=word>
+        <input type=submit>
+    </form>
+    {% for restaurant in restaurants %}
+    <ul>
+        <li>{{ restaurant.name }}</li>
+        <li>{{ restaurant.address }}</li>
+        <li>{{ restaurant.score }}</li>
+        <li>{{ restaurant.station }}</li>
+        <li>{{ restaurant.distance }}</li>
+        {% for tag in restaurant.tags %}
+            <b>{{ tag }}</b>
+        {% endfor %}
     </ul>
+    {% endfor %}
+  </div>
 </div>
 
 <body>

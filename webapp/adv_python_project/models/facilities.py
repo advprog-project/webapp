@@ -30,13 +30,17 @@ class Restaurant(Facility):
 	def getDistance(self):
 		return self.__distance
 
+	def getTags(self):
+		return self.__tags
+
 	def asdict(self):
 		return {
 			'name': self.getName(),
 			'address': self.getAddress(),
 			'score': self.getScore(),
 			'station': self.getStation(),
-			'distance': self.getDistance()
+			'distance': self.getDistance(),
+			'tags': self.getTags()
 		}
 
 		# return {

@@ -1,8 +1,10 @@
 class Facility(object):
-	def __init__(self, name, address, score):
+	def __init__(self, name, address, score, station, distance):
 		self._name = name
 		self._address = address
 		self._score = score
+		self._station = station
+		self._distance = distance
 
 	def getName(self):
 		return self._name
@@ -13,19 +15,17 @@ class Facility(object):
 	def getScore(self):
 		return self._score
 
-
-class Restaurant(Facility):
-	def __init__(self, name, address, score, tags, station, distance):
-		super(Restaurant, self).__init__(name, address, score)
-		self._tags = tags
-		self._station = station
-		self._distance = distance
-
 	def getStation(self):
 		return self._station
 
 	def getDistance(self):
 		return self._distance
+
+
+class Restaurant(Facility):
+	def __init__(self, name, address, score, tags, station, distance):
+		super(Restaurant, self).__init__(name, address, score, station, distance)
+		self._tags = tags
 
 	def getTags(self):
 		return self._tags
@@ -42,16 +42,12 @@ class Restaurant(Facility):
 
 
 class Hotel(Facility):
-	def __init__(self, name, address, score, star, distance):
-		super(Hotel, self).__init__(name, address, score)
+	def __init__(self, name, address, score, star, station, distance):
+		super(Hotel, self).__init__(name, address, score, station, distance)
 		self._star = star
-		self._distance = distance
 
 	def getStar(self):
 		return self._star
-
-	def getDistance(self):
-		return self._distance
 
 	def asdict(self):
 		return {
@@ -59,5 +55,6 @@ class Hotel(Facility):
 	      	'address': self._address,
 	      	'score': self._score,
 	      	'star': self._star,
-	      	'distance': self._distance
+			'station': self._station,
+	      	'distance': self._distance,
 	    }

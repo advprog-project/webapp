@@ -224,17 +224,17 @@ class HotelPage(FacilityPage):
 				address1 = items[2].decode('utf-8')
 				address2 = items[3].decode('utf-8')
 				score = float(items[4])
-				# TODO utf-8
 				star = int(items[5])
 				stationDistance = items[6].split(" ")
+				station = stationDistance[0].decode('utf-8')
 				distance = float(stationDistance[1].rstrip("km"))
 				address = address1 + address2
-				hotel = Hotel(name, address, score, star, distance)
+				hotel = Hotel(name, address, score, star, station, distance)
 				hotels.append(hotel)
 			fileHandler.close()
 			return hotels
 		except IOError:
-			print("Error: hotel.csvs does not exist or it can't be opened.")
+			print("Error: hotel.csv does not exist or it can't be opened.")
 
 	def get(self):
 		hotels = self._facilities

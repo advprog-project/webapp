@@ -1,63 +1,63 @@
 class Facility(object):
 	def __init__(self, name, address, score):
-		self.__name = name 
-		self.__address = address
-		self.__score = score
+		self._name = name
+		self._address = address
+		self._score = score
 
 	def getName(self):
-		return self.__name
+		return self._name
 
 	def getAddress(self):
-		return self.__address
+		return self._address
 
 	def getScore(self):
-		return self.__score
+		return self._score
 
 
 class Restaurant(Facility):
 	def __init__(self, name, address, score, tags, station, distance):
 		super(Restaurant, self).__init__(name, address, score)
-		self.__tags = tags
-		self.__station = station
-		self.__distance = distance
+		self._tags = tags
+		self._station = station
+		self._distance = distance
 
 	def getStation(self):
-		return self.__station
+		return self._station
 
 	def getDistance(self):
-		return self.__distance
+		return self._distance
 
 	def getTags(self):
-		return self.__tags
+		return self._tags
 
 	def asdict(self):
 		return {
-			'name': self.getName(),
-			'address': self.getAddress(),
-			'score': self.getScore(),
-			'station': self.getStation(),
-			'distance': self.getDistance(),
-			'tags': self.getTags()
+			'name': self._name,
+			'address': self._address,
+			'score': self._score,
+			'station': self._station,
+			'distance': self._distance,
+			'tags': self._tags
 		}
 
 
 class Hotel(Facility):
 	def __init__(self, name, address, score, star, distance):
-		super(Hotel, self).__init__(self, name, address, score)
-		self.__star = star
-		self.__distance = distance
+		super(Hotel, self).__init__(name, address, score)
+		self._star = star
+		self._distance = distance
 
 	def getStar(self):
-		return self.__star
+		return self._star
 
 	def getDistance(self):
-		return self.__distance
+		return self._distance
 
 	def asdict(self):
 		return {
-			'name': self.__name,
-	      		'address': self.__address,
-	      		'score': self.__score,
-	      		'star': self.__star,
-	      		'distance': self.__distance
-	    		}
+			'name': self._name,
+	      	'address': self._address,
+	      	'score': self._score,
+	      	'star': self._star,
+	      	'distance': self._distance
+	    }

@@ -89,7 +89,7 @@ class RestaurantPage(FacilityPage):
 			k, v = item.split('=')
 			keyMap[k] = v
 
-		distance = keyMap['distance']
+		distance = keyMap['dist']
 		keyword = keyMap['keyword']
 		keyword = unquote(keyword).decode('utf8')
 		sortBy = keyMap['sortBy']
@@ -227,7 +227,7 @@ class HotelPage(FacilityPage):
 				star = int(items[5])
 				stationDistance = items[6].split(" ")
 				station = stationDistance[0].decode('utf-8')
-				distance = float(stationDistance[1].rstrip("km"))
+				distance = int(float(stationDistance[1].rstrip("km")) * 1000)
 				address = address1 + address2
 				hotel = Hotel(name, address, score, star, station, distance)
 				hotels.append(hotel)
@@ -236,8 +236,117 @@ class HotelPage(FacilityPage):
 		except IOError:
 			print("Error: hotel.csv does not exist or it can't be opened.")
 
+	def parseQuery(self, query):
+		items = query.split('&') if query != '' else []
+		keyMap = defaultdict(str)
+		for item in items:
+			k, v = item.split('=')
+			keyMap[k] = v
+
+		distance = keyMap['dist']
+		keyword = keyMap['keyword']
+		keyword = unquote(keyword).decode('utf8')
+		sortBy = keyMap['sortBy']
+		sortOrder = keyMap['sortOrder']
+		station = keyMap['station']
+
+		try:
+			distance = float(distance) if distance != "" else float('inf')
+		except ValueError:
+			# TODO handle exception
+			distance = float('inf')
+
+		# except NegativeDistanceError:
+
+		stars = []
+		for k, v in keyMap.items():
+			if v == '1':
+				stars.append(int(k))
+
+		return {
+			'keyword': keyword,
+			'distance': distance,
+			'stars': stars,
+			'sortBy': sortBy,
+			'sortOrder': sortOrder,
+			'station': station
+		}
+
+	def filterFacilities(self, hotels, query):  # dictionary
+		keyWordFilter = query['keyword']
+		distanceFilter = query['distance']
+		starsFilter = query['stars']
+		stationFilter = query['station']
+		starsNumber = len(starsFilter)
+		filteredHotels = []
+		# A list containing all the keywords (no longer a string due to the (possibly) space in user input)
+		wordsFilter = keyWordFilter.split()
+		for hotel in hotels:
+			hasSmallerDistance = False
+			containsKeyword = False
+			containsStar = False
+			containsStation = False
+			starDet = 0
+			# check distance range
+			if hotel.getDistance() <= distanceFilter:
+				hasSmallerDistance = True
+
+			# check keywords
+			if len(wordsFilter) == 0:
+				containsKeyword = True
+			else:
+				for word in wordsFilter:
+					if word in hotel.getName():
+						containsKeyword = True
+						break
+
+			# check tags
+			if len(starsFilter) == 0:
+				containsStar = True
+			else:
+				for starFilter in starsFilter:  # star of user input
+					if hotel.getStar() == starFilter:
+						containsStar = True
+			# check stations
+			if (stationFilter == '') or hotel.getStation() == self.__stationMap[stationFilter]:  # contains user input station
+				containsStation = True
+
+			# satisfy all the three requirements
+			if hasSmallerDistance and containsKeyword and containsStar and containsStation:
+				filteredHotels.append(hotel)
+
+		return filteredHotels
+
+	# sort method can be used for facility class
+	def sortFacilities(self, hotels, query):  # sortOrder = sortBy[1]
+		sortOrder = query['sortOrder']
+		sortBy = query['sortBy']
+		if sortOrder == '' or sortBy == '':
+			return hotels
+
+		reverse = None
+		if sortOrder == 'asc':
+			reverse = False
+		elif sortOrder == 'des':
+			reverse = True
+		else:
+			# exception
+			pass
+
+		if sortBy == 'score':
+			hotels.sort(key=lambda x: x.getScore(), reverse=reverse)
+		elif sortBy == 'distance':
+			hotels.sort(key=lambda x: x.getDistance(), reverse=reverse)
+		else:
+			# exception
+			pass
+		return hotels
+
 	def get(self):
+		query = self.request.query_string
+		query = self.parseQuery(query)
 		hotels = self._facilities
+		hotels = self.filterFacilities(hotels, query)
 		hotels = list(map(lambda x: x.asdict(), hotels))
 
 		template_values = {

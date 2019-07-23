@@ -10,7 +10,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1" />
 <style>
 body {
   margin: 0;
@@ -43,20 +43,9 @@ body {
   <div class="hero-text">
     <h1 style="font-size:50px">hello!</h1>
     <ul>
-      <li><a href="">section1</a></li>
-      <li><a href="">section2</a></li>
-      <li><a href="">section3</a></li>
-    </ul> 
-    <form>
-        <input type=text name=word>
-        <input type=submit>
-    </form>
-    {% for restaurant in restaurants %}
-    <ul>
-        <li>{{ restaurant.name }}</li>
+      <li><a href="/restaurants">restaurants</a></li>
+      <li><a href="/hotels">hotels</a></li>
     </ul>
-    {% endfor %}
-  </div>
 </div>
 
 <body>

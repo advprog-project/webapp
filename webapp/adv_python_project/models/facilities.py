@@ -21,9 +21,6 @@ class Restaurant(Facility):
 		self.__station = station
 		self.__distance = distance
 
-	# def __str__(self):
-	# 	return self.__name + self.__address + str(self.__score) + self.__station + str(self.__distance)
-
 	def getStation(self):
 		return self.__station
 
@@ -43,14 +40,12 @@ class Restaurant(Facility):
 			'tags': self.getTags()
 		}
 
+
 class Hotel(Facility):
 	def __init__(self, name, address, score, star, distance):
 		super(Hotel, self).__init__(self, name, address, score)
 		self.__star = star
 		self.__distance = distance
-
-  #def __str__(self):
-  #  return self.__name + self.__address + str(self.__score) + self.__star + str(self.__distance)
 
 	def getStar(self):
 		return self.__star
@@ -66,4 +61,3 @@ class Hotel(Facility):
 	      		'star': self.__star,
 	      		'distance': self.__distance
 	    		}
-		

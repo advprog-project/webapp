@@ -1,4 +1,7 @@
 class Facility(object):
+	"""
+	Main author: ZHOU yanjun
+	"""
 	def __init__(self, name, address, score, station, distance):
 		self._name = name
 		self._address = address
@@ -23,6 +26,9 @@ class Facility(object):
 
 
 class Restaurant(Facility):
+	"""
+	authors: ZHOU Yanjun, HU Yuxin
+	"""
 	def __init__(self, name, address, score, tags, station, distance):
 		super(Restaurant, self).__init__(name, address, score, station, distance)
 		self._tags = tags
@@ -42,6 +48,9 @@ class Restaurant(Facility):
 
 
 class Hotel(Facility):
+	"""
+	authors: ZHOU Yanjun, HU Yuxin
+	"""
 	def __init__(self, name, address, score, star, station, distance):
 		super(Hotel, self).__init__(name, address, score, station, distance)
 		self._star = star

@@ -18,6 +18,9 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 class FacilityPage(webapp2.RequestHandler):
 
 	def __init__(self, *args, **kwargs):
+		"""
+		authors: HU Yuxin, ZHANG xiaoyue
+		"""
 		csvPath = kwargs["csvPath"]
 		del kwargs["csvPath"]
 		super(FacilityPage, self).__init__(*args, **kwargs)
@@ -43,6 +46,10 @@ class FacilityPage(webapp2.RequestHandler):
 class RestaurantPage(FacilityPage):
 
 	def __init__(self, *args, **kwargs):
+		"""
+		Main author: HU Yuxin
+		__tagMap: ZHOU Yanjun, determined TOP 6 frequent tags
+		"""
 		# Need to call super() like this due to python 2
 		kwargs["csvPath"] = "data/restaurant.csv"
 		super(RestaurantPage, self).__init__(*args, **kwargs)
@@ -64,6 +71,9 @@ class RestaurantPage(FacilityPage):
 		}
 
 	def readFacilities(self, csvPath):
+		"""
+		authors: ZHOU Yanjun,  HU Yuxin
+		"""
 		try:
 			restaurants = []
 			fileHandler = open(csvPath)
@@ -87,6 +97,9 @@ class RestaurantPage(FacilityPage):
 			print("Error: restaurant.csv does not exist or it can't be opened.")
 
 	def parseQuery(self, query):
+		"""
+		Main author: HU Yuxin
+		"""
 		items = query.split('&') if query != '' else []
 		keyMap = defaultdict(str)
 		for item in items:
@@ -122,6 +135,9 @@ class RestaurantPage(FacilityPage):
 		}
 
 	def filterFacilities(self, restaurants, query):  # dictionary
+		"""
+		authors: WU Wanqi, HU Yuxin
+		"""
 		keyWordFilter = query['keyword']
 		distanceFilter = query['distance']
 		tagsFilter = query['tags']
@@ -169,6 +185,9 @@ class RestaurantPage(FacilityPage):
 
 	# sort method can be used for facility class
 	def sortFacilities(self, restaurants, query):  # sortOrder = sortBy[1]
+		"""
+		authors: HU Yuxin, ZHOU Yanjun
+		"""
 		sortOrder = query['sortOrder']
 		sortBy = query['sortBy']
 		if sortOrder == '' or sortBy == '':
@@ -188,6 +207,9 @@ class RestaurantPage(FacilityPage):
 		return restaurants
 
 	def get(self):
+		"""
+		Main author: HU Yuxin
+		"""
 		query = self.request.query_string
 		restaurants = self._facilities
 		template_values = {}
@@ -214,10 +236,16 @@ class RestaurantPage(FacilityPage):
 class HotelPage(FacilityPage):
 
 	def __init__(self, *args, **kwargs):
+		"""
+		Main author: HU Yuxin
+		"""
 		kwargs["csvPath"] = "data/hotel.csv"
 		super(HotelPage, self).__init__(*args, **kwargs)
 			
 	def readFacilities(self, csvPath):
+		"""
+		authors: ZHOU Yanjun, HU Yuxin
+		"""
 		try:
 			hotels = []
 			fileHandler = open(csvPath)
@@ -242,6 +270,9 @@ class HotelPage(FacilityPage):
 			print("Error: hotel.csv does not exist or it can't be opened.")
 
 	def parseQuery(self, query):
+		"""
+		Main author: HU Yuxin
+		"""
 		items = query.split('&') if query != '' else []
 		keyMap = defaultdict(str)
 		for item in items:
@@ -277,6 +308,9 @@ class HotelPage(FacilityPage):
 		}
 
 	def filterFacilities(self, hotels, query):  # dictionary
+		"""
+		authors: WU Wanqi, HU Yuxin
+		"""
 		keyWordFilter = query['keyword']
 		distanceFilter = query['distance']
 		starsFilter = query['stars']
@@ -321,6 +355,9 @@ class HotelPage(FacilityPage):
 
 	# sort method can be used for facility class
 	def sortFacilities(self, hotels, query):  # sortOrder = sortBy[1]
+		"""
+		authors: ZHOU Yanjun, HU Yuxin
+		"""
 		sortOrder = query['sortOrder']
 		sortBy = query['sortBy']
 		if sortOrder == '' or sortBy == '':
@@ -341,6 +378,9 @@ class HotelPage(FacilityPage):
 		return hotels
 
 	def get(self):
+		"""
+		Main author: HU Yuxin
+		"""
 		query = self.request.query_string
 		hotels = self._facilities
 		errorMessage = ''
@@ -368,6 +408,9 @@ class HotelPage(FacilityPage):
 class MainPage(webapp2.RequestHandler):
 
 	def get(self):
+		"""
+		Main author: HU Yuxin
+		"""
 		template = JINJA_ENVIRONMENT.get_template('index.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render())

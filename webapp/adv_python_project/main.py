@@ -47,10 +47,14 @@ class RestaurantPage(FacilityPage):
 		kwargs["csvPath"] = "data/restaurant.csv"
 		super(RestaurantPage, self).__init__(*args, **kwargs)
 		self.__tagMap = {
-			'tyuuka': u'中華料理', # need to add 'u' in front to convert to unicode
+			'tyuuka': u'中華料理',  # need to add 'u' in front to convert to unicode
 			'izakaya': u'居酒屋',
-			'tukemen': u'つけ麺'
+			'cafe': u'カフェ',
+			'ramen': u'ラーメン',
+			'aburasoba': u'油そば',
+			'bar': u'バー',
 		}
+
 		self.__stationMap = {
 			'toden': u'早稲田（都電）駅',
 			'omokage': u'面影橋駅',

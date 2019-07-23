@@ -52,9 +52,9 @@ class Hotel(Facility):
 	def asdict(self):
 		return {
 			'name': self._name,
-	      	'address': self._address,
-	      	'score': self._score,
-	      	'star': self._star,
+			'address': self._address,
+			'score': self._score,
+			'star': self._star,
 			'station': self._station,
-	      	'distance': self._distance,
-	    }
+			'distance': self._distance,
+		}

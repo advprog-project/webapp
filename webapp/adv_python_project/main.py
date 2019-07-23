@@ -174,7 +174,6 @@ class RestaurantPage(FacilityPage):
 		if sortOrder == '' or sortBy == '':
 			return restaurants
 
-		reverse = None
 		if sortOrder == 'asc':
 			reverse = False
 		elif sortOrder == 'des':
@@ -327,22 +326,18 @@ class HotelPage(FacilityPage):
 		if sortOrder == '' or sortBy == '':
 			return hotels
 
-		reverse = None
 		if sortOrder == 'asc':
 			reverse = False
 		elif sortOrder == 'des':
 			reverse = True
 		else:
-			# exception
-			pass
+			reverse = True
 
 		if sortBy == 'score':
 			hotels.sort(key=lambda x: x.getScore(), reverse=reverse)
 		elif sortBy == 'distance':
 			hotels.sort(key=lambda x: x.getDistance(), reverse=reverse)
-		else:
-			# exception
-			pass
+
 		return hotels
 
 	def get(self):

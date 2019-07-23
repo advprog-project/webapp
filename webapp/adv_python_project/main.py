@@ -10,22 +10,40 @@ import webapp2
 from models.facilities import Restaurant
 
 JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
+	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+	extensions=['jinja2.ext.autoescape'],
+	autoescape=True)
 
 
 class FacilityPage(webapp2.RequestHandler):
-	pass
+
+	def __init__(self, *args, csvPath="", **kwargs):
+		# Due to python2
+		super(FacilityPage, self).__init__(*args, **kwargs)
+		self.__facilities = self.readFacilities(csvPath)
+		self.__recordLimit = 5
+
+	def readFacilities(self, csvPath):
+		raise NotImplementedError
+
+	def parseQuery(self, query):
+		raise NotImplementedError
+
+	def filterFacilities(self, facilities, query):
+		raise NotImplementedError
+
+	def sortFacilities(self, facilities, query):
+		raise NotImplementedError
+
+	def get(self):
+		raise NotImplementedError
 
 
-class RestaurantPage(webapp2.RequestHandler):
+class RestaurantPage(FacilityPage):
 
 	def __init__(self, *args, **kwargs):
-		# Due to python2
-		super(RestaurantPage, self).__init__(*args, **kwargs)
-		self.__restaurants = self.readRestaurants("data/restaurant.csv")
-		self.__recordLimit = 5
+		# Need to call super() like this due to python 2
+		super(RestaurantPage, self).__init__(*args, csvPath="data/restaurant.csv", **kwargs)
 		self.__tagMap = {
 			'tyuuka': u'中華料理', # need to add 'u' in front to convert to unicode
 			'izakaya': u'居酒屋',
@@ -39,7 +57,30 @@ class RestaurantPage(webapp2.RequestHandler):
 			'nishiwaseda': u'西早稲田駅'
 		}
 
-	def queryParser(self, query):
+	def readFacilities(self, csvPath):
+		try:
+			restaurants = []
+			fileHandler = open(csvPath)
+			lines = fileHandler.readlines()
+			for i in range(1, len(lines)):
+				line = lines[i]
+				items = line.strip().split(',')
+				name = items[1].decode('utf-8')
+				address = items[2].decode('utf-8')
+				score = float(items[3])
+				tags = (items[4].replace("??", "/")).strip().split('、')
+				tags = [tag.decode('utf-8') for tag in tags]
+				stationDistance = items[5].split(" ")
+				station = stationDistance[0].decode('utf-8')
+				distance = int(stationDistance[1].rstrip("m"))
+				restaurant = Restaurant(name, address, score, tags, station, distance)
+				restaurants.append(restaurant)
+			fileHandler.close()
+			return restaurants
+		except IOError:
+			print("Error: restaurant.csv does not exist or it can't be opened.")
+
+	def parseQuery(self, query):
 		items = query.split('&') if query != '' else []
 		keyMap = defaultdict(str)
 		for item in items:
@@ -75,7 +116,7 @@ class RestaurantPage(webapp2.RequestHandler):
 			'station': station
 		}
 
-	def filterRestaurants(self, query):  # dictionary
+	def filterFacilities(self, restaurants, query):  # dictionary
 		keyWordFilter = query['keyword']
 		distanceFilter = query['distance']
 		tagsFilter = query['tags']
@@ -84,7 +125,7 @@ class RestaurantPage(webapp2.RequestHandler):
 		filteredRestaurants = []
 		# A list containing all the keywords (no longer a string due to the (possibly) space in user input)
 		wordsFilter = keyWordFilter.split()
-		for restaurant in self.__restaurants:
+		for restaurant in restaurants:
 			hasSmallerDistance = False
 			containsKeyword = False
 			containsTag = False
@@ -122,7 +163,7 @@ class RestaurantPage(webapp2.RequestHandler):
 		return filteredRestaurants
 
 	# sort method can be used for facility class
-	def sortRestaurants(self, restaurants, query):  # sortOrder = sortBy[1]
+	def sortFacilities(self, restaurants, query):  # sortOrder = sortBy[1]
 		sortOrder = query['sortOrder']
 		sortBy = query['sortBy']
 		if sortOrder == '' or sortBy == '':
@@ -146,35 +187,10 @@ class RestaurantPage(webapp2.RequestHandler):
 			pass
 		return restaurants
 
-	""" exception
-        readfile 
-        thread: read two files in two threads"""
-	def readRestaurants(self, file_path):
-		try:
-			restaurants = []
-			fileHandler = open(file_path)
-			lines = fileHandler.readlines()
-			for i in range(1, len(lines)):
-				line = lines[i]
-				items = line.strip().split(',')
-				name = items[1].decode('utf-8')
-				address = items[2].decode('utf-8')
-				score = float(items[3])
-				tags = (items[4].replace("??", "/")).strip().split('、')
-				tags = [tag.decode('utf-8') for tag in tags]
-				stationDistance = items[5].split(" ")
-				station = stationDistance[0].decode('utf-8')
-				distance = int(stationDistance[1].rstrip("m"))
-				restaurant = Restaurant(name, address, score, tags, station, distance)
-				restaurants.append(restaurant)
-			fileHandler.close()
-			return restaurants
-		except IOError:
-			print("Error: restaurant.csv does not exist or it can't be opened.")
-
 	def get(self):
 		query = self.request.query_string
 		query = self.queryParser(query)
+		restaurants = self.__facilities
 		restaurants = self.filterRestaurants(query)
 		restaurants = self.sortRestaurants(restaurants, query)
 		restaurants = list(map(lambda x: x.asdict(), restaurants))

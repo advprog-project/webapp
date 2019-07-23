@@ -2,8 +2,6 @@
 Author: Wu Wanqi
 '''
 
-#To get the information about restaurants and store in csv file 
-#To get the restaurant images
 from bs4 import BeautifulSoup
 import time
 from selenium import webdriver
@@ -46,6 +44,7 @@ b=0
 #Dic['a']='string1'
 #Dic['a'].append('string2')
 #print(Dic)
+
 
 for i in range(1,12):
     browser.get('https://tabelog.com/tokyo/C13104/C36271/rstLst/%s/?svd=20190702&svt=1900&svps=2'%(str(i))) 
@@ -127,6 +126,7 @@ for i in range(1,12):
             b+=1
         else:
             a+=1
+
 
     temp_scores.clear()
     temp_names.clear()

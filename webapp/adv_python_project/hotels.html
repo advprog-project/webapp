@@ -10,6 +10,9 @@
             padding: 2em;
             background: white;
         }
+        .text-error {
+            color: red;
+        }
     </style>
     </head>
 
@@ -38,6 +41,7 @@
         </div>
         <div class="form-group">
         <input class="form-control" type="text" placeholder="distance" name="dist">
+        <small class="form-text text-error">{{ error }}</small>
         <input type="text" class="form-control" placeholder="hotel name" name="keyword">
         </div>
         <div class="form-group">

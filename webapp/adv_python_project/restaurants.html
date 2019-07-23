@@ -13,6 +13,10 @@
         .text-error {
             color: red;
         }
+        .card-img {
+            height: 100%;
+            width: auto
+        }
     </style>
     </head>
 
@@ -91,6 +95,12 @@
     </div>
     {% for restaurant in restaurants %}
     <ul>
+    <div class="card mb-3">
+      <div class="row no-gutters">
+        <div class="col-md-3">
+          <img src="https://raw.githubusercontent.com/advprog-project/webapp/master/webapp/images-1/{{ restaurant.name }}/1.jpg" class="card-img" >
+        </div>
+        <div class="col-md-9">
         <div class="card">
         <div class="card-body">
           <h5 class="card-title">{{ restaurant.name }}
@@ -104,6 +114,9 @@
         {% endfor %}
         </div>
         </div>
+        </div>
+      </div>
+    </div>
     </ul>
     {% endfor %}
 </div>

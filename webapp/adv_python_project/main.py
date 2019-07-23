@@ -176,8 +176,7 @@ class RestaurantPage(FacilityPage):
 		elif sortOrder == 'des':
 			reverse = True
 		else:
-			# exception
-			raise
+			reverse = True
 
 		if sortBy == 'score':
 			restaurants.sort(key=lambda x: x.getScore(), reverse=reverse)
@@ -200,6 +199,7 @@ class RestaurantPage(FacilityPage):
 			errorMessage = str(e)
 		except Exception as e:
 			errorMessage = str(e)
+
 		restaurants = list(map(lambda x: x.asdict(), restaurants))
 		template_values['restaurants'] = restaurants[0:self._recordLimit]
 		template_values['error'] = errorMessage
@@ -255,10 +255,9 @@ class HotelPage(FacilityPage):
 		try:
 			distance = float(distance) if distance != "" else float('inf')
 		except ValueError:
-			# TODO handle exception
-			distance = float('inf')
-
-		# except NegativeDistanceError:
+			raise ValueError('Distance should be a numeric value.')
+		if distance < 0:
+			raise NegativeDistanceError('Distance should be non-negative.')
 
 		stars = []
 		for k, v in keyMap.items():
@@ -279,7 +278,6 @@ class HotelPage(FacilityPage):
 		distanceFilter = query['distance']
 		starsFilter = query['stars']
 		stationFilter = query['station']
-		starsNumber = len(starsFilter)
 		filteredHotels = []
 		# A list containing all the keywords (no longer a string due to the (possibly) space in user input)
 		wordsFilter = keyWordFilter.split()
@@ -288,7 +286,6 @@ class HotelPage(FacilityPage):
 			containsKeyword = False
 			containsStar = False
 			containsStation = False
-			starDet = 0
 			# check distance range
 			if hotel.getDistance() <= distanceFilter:
 				hasSmallerDistance = True
@@ -346,16 +343,24 @@ class HotelPage(FacilityPage):
 
 	def get(self):
 		query = self.request.query_string
-		query = self.parseQuery(query)
 		hotels = self._facilities
-		hotels = self.filterFacilities(hotels, query)
-		hotels = self.sortFacilities(hotels, query)
+		errorMessage = ''
+		template_values = {}
+		try:
+			query = self.parseQuery(query)
+			hotels = self.filterFacilities(hotels, query)
+			hotels = self.sortFacilities(hotels, query)
+
+		except ValueError as e:
+			errorMessage = str(e)
+		except NegativeDistanceError as e:
+			errorMessage = str(e)
+		except Exception as e:
+			errorMessage = str(e)
+
 		hotels = list(map(lambda x: x.asdict(), hotels))
-
-		template_values = {
-			'hotels': hotels[0:self._recordLimit]
-		}
-
+		template_values['hotels'] =  hotels[0:self._recordLimit]
+		template_values['error'] = errorMessage
 		template = JINJA_ENVIRONMENT.get_template('hotels.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render(template_values))

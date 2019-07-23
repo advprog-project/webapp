@@ -347,6 +347,7 @@ class HotelPage(FacilityPage):
 		query = self.parseQuery(query)
 		hotels = self._facilities
 		hotels = self.filterFacilities(hotels, query)
+		hotels = self.sortFacilities(hotels, query)
 		hotels = list(map(lambda x: x.asdict(), hotels))
 
 		template_values = {

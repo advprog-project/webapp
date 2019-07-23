@@ -195,7 +195,6 @@ class RestaurantPage(FacilityPage):
 		restaurants = self.sortRestaurants(restaurants, query)
 		restaurants = list(map(lambda x: x.asdict(), restaurants))
 
-
 		template_values = {
 			'restaurants': restaurants[0:self.__recordLimit]
 		}
@@ -238,6 +237,31 @@ class HotelPage(webapp2.RequestHandler):
 			return restaurants
 		except IOError:
 			print("Error: restaurant.csv does not exist or it can't be opened.")
+			
+	def readHotels(file_path):
+	 	try:
+		    hotels = []
+		    fileHandler = open(file_path)
+		    lines = fileHandler.readlines()
+		    for i in range(1, len(lines)):
+			      line = lines[i]
+			      items = line.strip().split(',')
+			      name = items[1].decode('utf-8')
+			      address1 = items[2].decode('utf-8')
+			      address2 = items[3].decode('utf-8')
+			      score = float(items[4])
+			      # TODO utf-8
+			      star = int(items[5])
+			      stationDistance = items[6].split(" ")
+			      distance = float(stationDistance[1].rstrip("km"))
+			      address = address1 + address2
+			      hotel = Hotel(name, address, score, star, distance)
+			     #print(hotel.name, hotel.address, hotel.score, hotel.star, hotel.distance)
+			      hotels.append(hotel)
+		    fileHandler.close()
+		    return hotels
+		except IOError:
+			print("Error: hotel.csvs does not exist or it can't be opened.")
 
 	def get(self):
 		hotels = list(map(lambda x: x.asdict(), self.__hotels))
@@ -250,9 +274,6 @@ class HotelPage(webapp2.RequestHandler):
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render(template_values))
 
-	def post(self):
-		pass
-
 
 class MainPage(webapp2.RequestHandler):
 
@@ -260,8 +281,6 @@ class MainPage(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('index.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render())
-
-
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),

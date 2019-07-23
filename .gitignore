@@ -4,3 +4,4 @@ webapp/adv_python_project/app.yaml
 webapp/adv_python_project/appengine_config.py
 webapp/adv_python_project/index.yaml
 webapp/adv_python_project/lib
+.python-version

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 from urllib import unquote
+import operator
+from collections import defaultdict
 
 import jinja2
 import webapp2
@@ -13,6 +15,10 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
+class FacilityPage(webapp2.RequestHandler):
+	pass
+
+
 class RestaurantPage(webapp2.RequestHandler):
 
 	def __init__(self, *args, **kwargs):
@@ -20,18 +26,32 @@ class RestaurantPage(webapp2.RequestHandler):
 		super(RestaurantPage, self).__init__(*args, **kwargs)
 		self.__restaurants = self.readRestaurants("data/restaurant.csv")
 		self.__recordLimit = 5
-		self.__tag_map = {
-			'tyuuka': u'中華料理',
+		self.__tagMap = {
+			'tyuuka': u'中華料理', # need to add 'u' in front to convert to unicode
 			'izakaya': u'居酒屋',
 			'tukemen': u'つけ麺'
 		}
+		self.__stationMap = {
+			'toden': u'早稲田（都電）駅',
+			'omokage': u'面影橋駅',
+			'waseda': u'早稲田（メトロ）駅',
+			'takadanobaba': u'高田馬場駅',
+			'nishiwaseda': u'西早稲田駅'
+		}
 
-	def queryParser(self, query):  # query:  =1&izakaya=1&keyword=黄金
-		tags = []
-		items = query.split('&')
-		keyword = items[-1].split('=')[-1]
+	def queryParser(self, query):
+		items = query.split('&') if query != '' else []
+		keyMap = defaultdict(str)
+		for item in items:
+			k, v = item.split('=')
+			keyMap[k] = v
+
+		distance = keyMap['distance']
+		keyword = keyMap['keyword']
 		keyword = unquote(keyword).decode('utf8')
-		distance = items[-2].split('=')[-1]
+		sortBy = keyMap['sortBy']
+		sortOrder = keyMap['sortOrder']
+		station = keyMap['station']
 
 		try:
 			distance = float(distance) if distance != "" else float('inf')
@@ -41,21 +61,25 @@ class RestaurantPage(webapp2.RequestHandler):
 
 		# except NegativeDistanceError:
 
-		for i in range(len(items) - 2):
-			temp = items[i].split('=')
-			tags.append(temp[0])
+		tags = []
+		for k, v in keyMap.items():
+			if v == '1':
+				tags.append(k)
 
 		return {
 			'keyword': keyword,
 			'distance': distance,
-			'tags': tags
+			'tags': tags,
+			'sortBy': sortBy,
+			'sortOrder': sortOrder,
+			'station': station
 		}
 
 	def filterRestaurants(self, query):  # dictionary
-		print(query)
 		keyWordFilter = query['keyword']
 		distanceFilter = query['distance']
 		tagsFilter = query['tags']
+		stationFilter = query['station']
 		tagsNumber = len(tagsFilter)
 		filteredRestaurants = []
 		# A list containing all the keywords (no longer a string due to the (possibly) space in user input)
@@ -64,6 +88,7 @@ class RestaurantPage(webapp2.RequestHandler):
 			hasSmallerDistance = False
 			containsKeyword = False
 			containsTag = False
+			containsStation = False
 			tagDet = 0
 			# check distance range
 			if restaurant.getDistance() <= distanceFilter:
@@ -81,16 +106,45 @@ class RestaurantPage(webapp2.RequestHandler):
 			# check tags
 			for tagFilter in tagsFilter:  # tag of user input
 				for tag in restaurant.getTags():  # tag of restaurant
-					if self.__tag_map[tagFilter] == tag:
+					if self.__tagMap[tagFilter] == tag:
 						tagDet += 1
 			if (tagDet == tagsNumber) or tagsNumber == 0:  # contains all the user input tags
 				containsTag = True
 
+			# check stations
+			if (stationFilter == '') or restaurant.getStation() == self.__stationMap[stationFilter]:  # contains user input station
+				containsStation = True
+
 			# satisfy all the three requirements
-			if hasSmallerDistance and containsKeyword and containsTag:
+			if hasSmallerDistance and containsKeyword and containsTag and containsStation:
 				filteredRestaurants.append(restaurant)
 
 		return filteredRestaurants
+
+	# sort method can be used for facility class
+	def sortRestaurants(self, restaurants, query):  # sortOrder = sortBy[1]
+		sortOrder = query['sortOrder']
+		sortBy = query['sortBy']
+		if sortOrder == '' or sortBy == '':
+			return restaurants
+
+		reverse = None
+		if sortOrder == 'asc':
+			reverse = False
+		elif sortOrder == 'des':
+			reverse = True
+		else:
+			# exception
+			pass
+
+		if sortBy == 'score':
+			restaurants.sort(key=lambda x: x.getScore(), reverse=reverse)
+		elif sortBy == 'distance':
+			restaurants.sort(key=lambda x: x.getDistance(), reverse=reverse)
+		else:
+			# exception
+			pass
+		return restaurants
 
 	""" exception
         readfile 
@@ -119,10 +173,12 @@ class RestaurantPage(webapp2.RequestHandler):
 			print("Error: restaurant.csv does not exist or it can't be opened.")
 
 	def get(self):
-		query = self.request.query_string if self.request.query_string != "" else "dist=&keyword="
+		query = self.request.query_string
 		query = self.queryParser(query)
 		restaurants = self.filterRestaurants(query)
+		restaurants = self.sortRestaurants(restaurants, query)
 		restaurants = list(map(lambda x: x.asdict(), restaurants))
+
 
 		template_values = {
 			'restaurants': restaurants[0:self.__recordLimit]
@@ -131,11 +187,6 @@ class RestaurantPage(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('restaurants.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render(template_values))
-
-	def post(self):
-		# tyuka = self.request.get('tyuka', 'restaurants')
-		# print(tyuka)
-		pass
 
 
 class HotelPage(webapp2.RequestHandler):
@@ -193,6 +244,7 @@ class MainPage(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('index.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render())
+
 
 
 app = webapp2.WSGIApplication([

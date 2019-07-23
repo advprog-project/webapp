@@ -8,12 +8,12 @@ import jinja2
 import webapp2
 
 from models.facilities import Restaurant, Hotel
+from custom_exceptions.exceptions import NegativeDistanceError
 
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
 	extensions=['jinja2.ext.autoescape'],
 	autoescape=True)
-
 
 class FacilityPage(webapp2.RequestHandler):
 
@@ -99,10 +99,9 @@ class RestaurantPage(FacilityPage):
 		try:
 			distance = float(distance) if distance != "" else float('inf')
 		except ValueError:
-			# TODO handle exception
-			distance = float('inf')
-
-		# except NegativeDistanceError:
+			raise ValueError('Distance should be a numeric value.')
+		if distance < 0:
+			raise NegativeDistanceError('Distance should be non-negative.')
 
 		tags = []
 		for k, v in keyMap.items():
@@ -178,29 +177,32 @@ class RestaurantPage(FacilityPage):
 			reverse = True
 		else:
 			# exception
-			pass
+			raise
 
 		if sortBy == 'score':
 			restaurants.sort(key=lambda x: x.getScore(), reverse=reverse)
 		elif sortBy == 'distance':
 			restaurants.sort(key=lambda x: x.getDistance(), reverse=reverse)
-		else:
-			# exception
-			pass
 		return restaurants
 
 	def get(self):
 		query = self.request.query_string
-		query = self.parseQuery(query)
 		restaurants = self._facilities
-		restaurants = self.filterFacilities(restaurants, query)
-		restaurants = self.sortFacilities(restaurants, query)
+		template_values = {}
+		errorMessage = ''
+		try:
+			query = self.parseQuery(query)
+			restaurants = self.filterFacilities(restaurants, query)
+			restaurants = self.sortFacilities(restaurants, query)
+		except ValueError as e:
+			errorMessage = str(e)
+		except NegativeDistanceError as e:
+			errorMessage = str(e)
+		except Exception as e:
+			errorMessage = str(e)
 		restaurants = list(map(lambda x: x.asdict(), restaurants))
-
-		template_values = {
-			'restaurants': restaurants[0:self._recordLimit]
-		}
-
+		template_values['restaurants'] = restaurants[0:self._recordLimit]
+		template_values['error'] = errorMessage
 		template = JINJA_ENVIRONMENT.get_template('restaurants.html')
 		self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
 		self.response.write(template.render(template_values))
